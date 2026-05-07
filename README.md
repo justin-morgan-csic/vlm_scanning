@@ -1,6 +1,6 @@
 # VLM document scanning — Gemini PDF to per-page Excel extraction
 
-This script sends a PDF to Gemini page by page, asks it to extract a complex table using a structured prompt, and saves one Excel file per page.
+This script sends a PDF to Gemini page by page, asks it to extract a complex table with a strict JSON schema (no guessing) and saves one Excel file per page.
 
 ## 1) Install dependencies
 
@@ -40,3 +40,6 @@ The script writes one workbook per page to `output/` with this format:
 
 - `inputfilename_ppX_vlm_scanned.xlsx`
 - Example: `output/test_pdf_pp1_vlm_scanned.xlsx`
+
+
+The output workbook includes additional reliability columns: `confidence` and `source_note`.
