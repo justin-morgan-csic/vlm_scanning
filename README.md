@@ -1,6 +1,6 @@
-# VLM document scanning — Gemini table extraction
+# VLM document scanning — Gemini API bootstrap
 
-This script sends an image to Gemini, asks it to extract the table, and saves the result as CSV.
+This repo now includes a minimal Python connectivity check for the Gemini API so you can start building a document-scanning pipeline.
 
 ## 1) Install dependencies
 
@@ -10,40 +10,32 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-> On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1`.
-
 ## 2) Set your API key
+
+Create an API key in Google AI Studio, then export it:
 
 ```bash
 export GEMINI_API_KEY="your_key_here"
 ```
 
-Optional:
+Optional: override model (defaults to `gemini-2.5-flash`):
 
 ```bash
 export GEMINI_MODEL="gemini-2.5-flash"
 ```
 
-## 3) Add your input image
-
-Place the table image at:
-
-- `input/test_image.jpg`
-
-## 4) Run extraction
+## 3) Run the connectivity check
 
 ```bash
 python gemini_connect.py
 ```
 
-The script writes:
+Expected output includes:
 
-- `input/test_image_VLM_SCANNED.csv`
+- `Model: gemini-2.5-flash`
+- `Gemini API connected`
 
-## Naming rule
+## Notes
 
-Output name is always:
-
-- `<original_filename>_VLM_SCANNED.csv`
-
-in the same directory as the input file.
+- `gemini-2.5-flash` is a high-capability model that is generally available in Gemini Developer API docs and listed with a free tier in Gemini pricing docs (limits/rates can change).
+- If your key or project tier does not have access, the script will fail with a model/access error; switch to a model currently available to your project.
