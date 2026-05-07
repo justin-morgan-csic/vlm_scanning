@@ -31,6 +31,7 @@ item,country,measurement,Q_yearX,Q_yearX,Q_yearX,V_yearX,V_yearX,V_yearX,page
 
 The page column should have the name of the pdf plus the page in which this data point is found. For this page, set all page cells to: {page_label}
 When there is a Total value, put the country as Total. Remove From from the country column. Make sure all columns and rows are properly scanned. Make sure all country names are spelled correctly.
+Some products have hierarchical headers. Include headers in the item name joined with ": ". Example: Meat > Chilled > Lamb should be written as Meat: Chilled: Lamb.
 Return only CSV text, no markdown, no extra commentary."""
 
 
