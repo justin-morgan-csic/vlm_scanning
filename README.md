@@ -1,6 +1,6 @@
-# VLM document scanning — Gemini PDF to Excel extraction
+# VLM document scanning — Gemini PDF to per-page Excel extraction
 
-This script sends a PDF to Gemini, asks it to extract a complex table using a structured prompt, and saves the result as an Excel file.
+This script sends a PDF to Gemini page by page, asks it to extract a complex table using a structured prompt, and saves one Excel file per page.
 
 ## 1) Install dependencies
 
@@ -36,6 +36,7 @@ Place the PDF at:
 python gemini_connect.py
 ```
 
-The script writes:
+The script writes one workbook per page to `output/` with this format:
 
-- `output.xlsx`
+- `inputfilename_ppX_vlm_scanned.xlsx`
+- Example: `output/test_pdf_pp1_vlm_scanned.xlsx`
