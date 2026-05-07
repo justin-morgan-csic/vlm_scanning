@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract a table from an image with Gemini and save it as CSV."""
+"""Extract structured table data from a PDF using Gemini and save to Excel."""
 
 import csv
 import os
@@ -9,10 +9,25 @@ from pathlib import Path
 
 from google import genai
 from google.genai import types
+from openpyxl import Workbook
 
-
-def output_csv_path(input_path: Path) -> Path:
-    return input_path.with_name(f"{input_path.stem}_VLM_SCANNED.csv")
+PROMPT = """Hello. I have a pdf with a table. The table structure is as follows:
+The first column is the item and country. Next to the item/country is a measurement. If marked with \"\", it is the same measurement as the item above.
+The structure here is
+Item1:
+country1
+country2
+...
+Item2:
+country1
+country2
+and so forth.
+each row has 6 values, in addition to the product/country and measurement.
+the first three columns are years for monthly data, the last 3 columns are years for yearly data. I only want the last 3 columns.
+Can you use a visual language model to scan this pdf and return CSV with the following structure? replace yearX with the year (for example, 1911 would be Q_1911)
+item,country,measurement,Q_yearX,Q_yearX,Q_yearX
+When there is a Total value, put the country as Total. Remove From from the country column. Make sure all columns and rows are properly scanned. Make sure all country names are spelled correctly.
+Return only CSV text, no markdown, no extra commentary."""
 
 
 def extract_csv_text(model_text: str) -> str:
@@ -22,11 +37,20 @@ def extract_csv_text(model_text: str) -> str:
     return model_text.strip()
 
 
-def validate_csv(csv_text: str) -> str:
+def parse_csv_rows(csv_text: str) -> list[list[str]]:
     rows = list(csv.reader(csv_text.splitlines()))
     if not rows:
         raise ValueError("The model returned empty CSV data.")
-    return "\n".join(",".join(row) for row in rows)
+    return rows
+
+
+def write_excel(rows: list[list[str]], output_path: Path) -> None:
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "scanned_table"
+    for row in rows:
+        ws.append(row)
+    wb.save(output_path)
 
 
 def main() -> int:
@@ -35,15 +59,16 @@ def main() -> int:
         print("Missing GEMINI_API_KEY environment variable.", file=sys.stderr)
         return 1
 
-    input_path = Path("input/test_image.jpg")
+    input_path = Path("input/test_pdf.pdf")
     if not input_path.exists():
-        print(f"Input image not found: {input_path}", file=sys.stderr)
+        print(f"Input PDF not found: {input_path}", file=sys.stderr)
         return 1
 
+    output_path = Path("output.xlsx")
     model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     client = genai.Client(api_key=api_key)
 
-    image_bytes = input_path.read_bytes()
+    pdf_bytes = input_path.read_bytes()
 
     response = client.models.generate_content(
         model=model,
@@ -51,27 +76,20 @@ def main() -> int:
             types.Content(
                 role="user",
                 parts=[
-                    types.Part.from_text(
-                        text=(
-                            "Extract the table from this image and return only CSV text. "
-                            "No markdown, no explanations, no extra text."
-                        )
-                    ),
-                    types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
+                    types.Part.from_text(text=PROMPT),
+                    types.Part.from_bytes(data=pdf_bytes, mime_type="application/pdf"),
                 ],
             )
         ],
     )
 
     csv_text = extract_csv_text(response.text or "")
-    clean_csv = validate_csv(csv_text)
-
-    output_path = output_csv_path(input_path)
-    output_path.write_text(clean_csv + "\n", encoding="utf-8")
+    rows = parse_csv_rows(csv_text)
+    write_excel(rows, output_path)
 
     print(f"Model: {model}")
-    print(f"Input: {input_path}")
-    print(f"Output CSV: {output_path}")
+    print(f"Input PDF: {input_path}")
+    print(f"Output Excel: {output_path}")
     return 0
 
 

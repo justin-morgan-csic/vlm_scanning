@@ -1,6 +1,6 @@
-# VLM document scanning — Gemini table extraction
+# VLM document scanning — Gemini PDF to Excel extraction
 
-This script sends an image to Gemini, asks it to extract the table, and saves the result as CSV.
+This script sends a PDF to Gemini, asks it to extract a complex table using a structured prompt, and saves the result as an Excel file.
 
 ## 1) Install dependencies
 
@@ -24,11 +24,11 @@ Optional:
 export GEMINI_MODEL="gemini-2.5-flash"
 ```
 
-## 3) Add your input image
+## 3) Add your input PDF
 
-Place the table image at:
+Place the PDF at:
 
-- `input/test_image.jpg`
+- `input/test_pdf.pdf`
 
 ## 4) Run extraction
 
@@ -38,12 +38,4 @@ python gemini_connect.py
 
 The script writes:
 
-- `input/test_image_VLM_SCANNED.csv`
-
-## Naming rule
-
-Output name is always:
-
-- `<original_filename>_VLM_SCANNED.csv`
-
-in the same directory as the input file.
+- `output.xlsx`
